@@ -1,4 +1,4 @@
-module github.com/dhostx/libdns-sdns
+module github.com/dhostx/libdns_kyberio
 
 go 1.22.2
 
