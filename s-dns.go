@@ -193,10 +193,11 @@ func AddOrUpdateRR(ctx context.Context, ddnsKey string, zoneName string, records
 	var recordsToAppend []ResourceRecord
 
 	for _, record := range records {
+		var rec = record.RR()
 		recordsToAppend = append(recordsToAppend, ResourceRecord{
-			Host:         record.Name,
-			Type:         record.Type,
-			Value:        record.Value,
+			Host:         rec.Name,
+			Type:         rec.Type,
+			Value:        rec.Data,
 			KeepExisting: keepExisting,
 		})
 
@@ -251,11 +252,12 @@ func AddOrUpdateRR(ctx context.Context, ddnsKey string, zoneName string, records
 func DeleteRR(ctx context.Context, ddnsKey string, zoneName string, records []libdns.Record) (deletedRRs []ResourceRecord, err error) {
 	recordsToDelete := []ResourceRecord{}
 	for _, record := range records {
+		var rec = record.RR()
 		recordsToDelete = append(recordsToDelete,
 			ResourceRecord{
-				Host:  record.Name,
-				Type:  record.Type,
-				Value: record.Value,
+				Host:  rec.Name,
+				Type:  rec.Type,
+				Value: rec.Data,
 			})
 	}
 	request := ZoneRequest{
@@ -315,11 +317,11 @@ func appendRecords(ctx context.Context, ddnsKey string, zoneName string, records
 	// return only newly added records
 	for _, record := range resultRecords {
 		if record.PerformedAction == "added" {
-			appendedRecords = append(appendedRecords, libdns.Record{
-				Type:  record.Type,
-				Name:  record.Host,
-				Value: record.Value,
-				TTL:   time.Duration(zoneExport.ttl) * time.Second,
+			appendedRecords = append(appendedRecords, libdns.RR{
+				Type: record.Type,
+				Name: record.Host,
+				Data: record.Value,
+				TTL:  time.Duration(zoneExport.ttl) * time.Second,
 			})
 		}
 	}
@@ -348,11 +350,11 @@ func setRecords(ctx context.Context, ddnsKey string, zoneName string, records []
 	// return only newly added records
 	for _, record := range resultRecords {
 		if record.PerformedAction == "updated" {
-			updatedRecords = append(updatedRecords, libdns.Record{
-				Type:  record.Type,
-				Name:  record.Host,
-				Value: record.Value,
-				TTL:   time.Duration(zoneExport.ttl) * time.Second,
+			updatedRecords = append(updatedRecords, libdns.RR{
+				Type: record.Type,
+				Name: record.Host,
+				Data: record.Value,
+				TTL:  time.Duration(zoneExport.ttl) * time.Second,
 			})
 		}
 	}
@@ -370,11 +372,11 @@ func getRecords(ctx context.Context, ddnsKey string, zoneName string) (records [
 	}
 
 	for _, record := range zoneExport.records {
-		records = append(records, libdns.Record{
-			Name:  record.Host,
-			Type:  record.Type,
-			Value: record.Value,
-			TTL:   time.Duration(zoneExport.ttl) * time.Second,
+		records = append(records, libdns.RR{
+			Name: record.Host,
+			Type: record.Type,
+			Data: record.Value,
+			TTL:  time.Duration(zoneExport.ttl) * time.Second,
 		})
 	}
 	return records, nil
@@ -393,11 +395,11 @@ func deleteRecords(ctx context.Context, ddnsKey string, zoneName string, records
 
 	for _, record := range deletedRecords {
 		if record.PerformedAction == "deleted" {
-			recordsDeleted = append(recordsDeleted, libdns.Record{
-				Name:  record.Host,
-				Type:  record.Type,
-				Value: record.Value,
-				TTL:   time.Duration(zoneExport.ttl) * time.Second,
+			recordsDeleted = append(recordsDeleted, libdns.RR{
+				Name: record.Host,
+				Type: record.Type,
+				Data: record.Value,
+				TTL:  time.Duration(zoneExport.ttl) * time.Second,
 			})
 		}
 	}
