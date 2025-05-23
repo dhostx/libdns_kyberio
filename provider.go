@@ -1,4 +1,4 @@
-package sdns
+package libdns_kyberio
 
 import (
 	"context"

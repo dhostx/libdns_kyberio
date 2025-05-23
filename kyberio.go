@@ -1,4 +1,4 @@
-package sdns
+package libdns_kyberio
 
 import (
 	"bytes"
@@ -102,7 +102,6 @@ type ZoneExport struct {
 // getZone retrieves and parses zone information using the provided context, DDNS key, and zone name.
 // It returns the ZoneExport containing records and TTL, or an error if the operation fails.
 func getZone(ctx context.Context, ddnsKey string, zoneName string) (export ZoneExport, e error) {
-	fmt.Println("sdns getZone")
 
 	// Prepare XML
 	requestData := ZoneRequest{
@@ -139,9 +138,6 @@ func getZone(ctx context.Context, ddnsKey string, zoneName string) (export ZoneE
 		ttl:     response.SOA.MTTL,
 	}
 
-	fmt.Printf("ZoneExport: %+v\n", retvalue)
-
-	fmt.Println("sdns getZone done")
 	return retvalue, nil
 }
 
@@ -195,7 +191,6 @@ func GetRootZone(ddnsKey string, hostname string) (zonename string, err error) {
 // keepExisting (flag to retain or overwrite existing records).
 // Returns: A slice of updated or added resource records and an error if the operation fails.
 func AddOrUpdateRR(ctx context.Context, ddnsKey string, zoneName string, records []libdns.Record, keepExisting bool) ([]ResourceRecord, error) {
-	fmt.Println("sdns AddOrUpdateRR")
 	// Create the request object
 	var recordsToAppend []ResourceRecord
 
@@ -219,7 +214,6 @@ func AddOrUpdateRR(ctx context.Context, ddnsKey string, zoneName string, records
 		},
 	}
 
-	fmt.Printf("sdns AddOrUpdateRR ZoneRequest: %+v\n", request)
 	// Marshal the request object to XML
 	xmlData, err := xml.MarshalIndent(request, "", "  ")
 	if err != nil {
@@ -252,15 +246,12 @@ func AddOrUpdateRR(ctx context.Context, ddnsKey string, zoneName string, records
 		return response.Records, nil
 	}
 
-	fmt.Printf("sdns AddOrUpdateRR response: %+v\n", response)
-	fmt.Println("sdns AddOrUpdateRR done")
 	return nil, fmt.Errorf("failed to add or update records: %s", response.Status)
 }
 
 // DeleteRR deletes specified resource records from a DNS zone using the provided ddnsKey and zoneName.
 // It sends a POST request with the required XML payload and returns the deleted resource records or an error.
 func DeleteRR(ctx context.Context, ddnsKey string, zoneName string, records []libdns.Record) (deletedRRs []ResourceRecord, err error) {
-	fmt.Println("sdns DeleteRR")
 	recordsToDelete := []ResourceRecord{}
 	for _, record := range records {
 		var rec = record.RR()
@@ -279,7 +270,6 @@ func DeleteRR(ctx context.Context, ddnsKey string, zoneName string, records []li
 			DDNSKey: ddnsKey,
 		},
 	}
-	fmt.Printf("sdns DeleteRR ZoneRequest: %+v\n", request)
 
 	xmlData, err := xml.MarshalIndent(request, "", "  ")
 	if err != nil {
@@ -305,8 +295,6 @@ func DeleteRR(ctx context.Context, ddnsKey string, zoneName string, records []li
 		return nil, fmt.Errorf("failed to unmarshal response body: %w", err)
 	}
 
-	fmt.Printf("sdns DeleteRR response: %+v\n", response)
-	fmt.Println("sdns DeleteRR done")
 	return response.Records, nil
 }
 
